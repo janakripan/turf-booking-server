@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 const app = express();
 require("dotenv").config();
 
@@ -22,6 +23,10 @@ mongoose.connect(dbConnectionLink).then((res) => {
   console.log("db connected");
 });
 
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  credentials: true
+}));
 app.use(cookieParser());
 app.use(express.json());
 app.use(getUserMiddleware);
