@@ -16,12 +16,18 @@ const createBookingController = async (req, res) => {
       return res.status(404).json({ message: "Turf not found" });
     }
 
+    if (turf.bannedUsers && turf.bannedUsers.includes(userId)) {
+      return res.status(403).json({ message: "You are banned from booking this turf." });
+    }
+
     // 1. Availability Check (Day of week)
     const bookingDate = new Date(date);
     const dayOfWeek = bookingDate.toLocaleDateString("en-US", {
       weekday: "long",
     });
-    const dayAvailability = turf.availability.find((a) => a.day === dayOfWeek);
+    const dayAvailability = turf.availability?.find(
+        (a) => a.day?.trim().toLowerCase() === dayOfWeek.toLowerCase()
+      );
 
     if (!dayAvailability) {
       return res
@@ -83,8 +89,11 @@ const createBookingController = async (req, res) => {
     if (err.name === "ValidationError") {
       const message = getValidationErrorMessage(err);
       res.status(400).json({ message });
+    } else if (err.name === "CastError") {
+      res.status(400).json({ message: "Invalid Turf ID format" });
     } else {
-      res.status(500).json({ message: "Server error", err });
+      console.error("Booking Error:", err);
+      res.status(500).json({ message: "Server error", error: err.message });
     }
   }
 };
@@ -102,4 +111,49 @@ const getUserBookingsController = async (req, res) => {
   }
 };
 
-module.exports = { createBookingController, getUserBookingsController };
+const getAvailableSlotsController = async (req, res) => {
+  try {
+    const { turfId } = req.params;
+    const { date } = req.query; // YYYY-MM-DD
+
+    if (!date) {
+      return res.status(400).json({ message: "Date is required" });
+    }
+
+    const bookings = await BookingModel.find({
+      turf: turfId,
+      date: new Date(date),
+      status: { $in: ["pending", "confirmed"] },
+    }).select("startTime endTime");
+
+    res.status(200).json({ message: "Fetched bookings for date", bookings });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", err });
+  }
+};
+
+const getAdminTurfBookingsController = async (req, res) => {
+  try {
+    // Find all turfs owned by this admin
+    const adminTurfs = await TurfModel.find({ admin: req.user._id }).select("_id");
+    const turfIds = adminTurfs.map((t) => t._id);
+
+    const bookings = await BookingModel.find({ turf: { $in: turfIds } })
+      .populate("user", "userName email contactNo")
+      .populate("turf", "name location")
+      .sort({ createdAt: -1 });
+
+    res
+      .status(200)
+      .json({ message: "Fetched admin turf bookings", bookings });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", err });
+  }
+};
+
+module.exports = {
+  createBookingController,
+  getUserBookingsController,
+  getAvailableSlotsController,
+  getAdminTurfBookingsController,
+};

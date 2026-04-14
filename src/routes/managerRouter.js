@@ -3,6 +3,8 @@ const router = express.Router();
 const {
   getManagerBookingsController,
   updateBookingStatusController,
+  banUserController,
+  unbanUserController,
 } = require("../controllers/managerController");
 const {
   managerOnlyMiddleware,
@@ -13,5 +15,7 @@ router.use(managerOnlyMiddleware);
 
 router.get("/bookings", getManagerBookingsController);
 router.patch("/booking/status", updateBookingStatusController);
+router.post("/ban", banUserController);
+router.post("/unban", unbanUserController);
 
 module.exports = router;

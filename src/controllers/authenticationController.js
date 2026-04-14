@@ -63,18 +63,14 @@ const loginController = async (req, res) => {
     }
     const { email, password } = req.body;
     const user = await UserModel.findOne({ email });
-    console.log(user)
-    if (user.isActive === false) {
+    
+    if (user && user.isActive === false) {
       return res
         .status(401)
-        .jsonn({ message: "Account is inactive, please contact admin" });
+        .json({ message: "Account is inactive, please contact admin" });
     }
+
     if (user) {
-      if (user.isActive === false) {
-        return res
-          .status(401)
-          .jsonn({ message: "Account is inactive, please contact admin" });
-      }
       bcrypt.compare(password, user.password, function (err, result) {
         if (result) {
           var token = jwt.sign({ email }, JWT_SECRET);

@@ -12,6 +12,7 @@ const turfUserRouter = require("./src/routes/userRouter");
 const bookingRouter = require("./src/routes/bookingRouter");
 const reviewRouter = require("./src/routes/reviewRouter");
 const managerRouter = require("./src/routes/managerRouter");
+const paymentRouter = require("./src/routes/paymentRouter");
 const {
   getUserMiddleware,
 } = require("./src/middlewares/authenticationMiddleware");
@@ -42,6 +43,7 @@ app.use("/api/turf", turfUserRouter);
 app.use("/api/booking", bookingRouter);
 app.use("/api/review", reviewRouter);
 app.use("/api/manager", managerRouter);
+app.use("/api/payment", paymentRouter);
 
 app.listen(port, () => {
   console.log(`server running ON PORT ${port}...`);

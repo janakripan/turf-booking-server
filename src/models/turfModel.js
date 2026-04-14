@@ -32,6 +32,14 @@ const turfSchema = new mongoose.Schema(
       },
     ],
 
+    // users banned from this turf
+    bannedUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+      },
+    ],
+
     // availability (required fields for each slot)
     availability: [
       {

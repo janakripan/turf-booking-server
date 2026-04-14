@@ -4,7 +4,9 @@ const { getValidationErrorMessage } = require("../utils/validationUtils");
 const createTurfController = async (req, res) => {
   try {
     const data = req.body;
-    data.admin = req.user._id;
+    if (!data.admin) {
+        data.admin = req.user._id;
+    }
     const newTurf = await (await TurfModel.create(data)).populate("admin");
     res.status(200).json({ message: "gym created successfully", newTurf });
   } catch (err) {
@@ -24,7 +26,12 @@ const createTurfController = async (req, res) => {
 const turfListController = async (req, res) => {
   try {
     const user = req.user;
-    const turfList = await TurfModel.find({ admin: user._id });
+    let turfList;
+    if (user.role === "superadmin") {
+      turfList = await TurfModel.find();
+    } else {
+      turfList = await TurfModel.find({ admin: user._id });
+    }
     res
       .status(200)
       .json({ message: "fetched turf list successfully", turfList });

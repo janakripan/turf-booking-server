@@ -24,7 +24,7 @@ const superAdminOnlyMiddleware = (req, res, next) => {
 };
 
 const adminOnlyMiddleware = (req, res, next) => {
-  if (req.user.role === "admin") {
+  if (req.user.role === "admin" || req.user.role === "superadmin") {
     next();
   } else {
     res.status(401).json({ message: "user is not a turf admin" });

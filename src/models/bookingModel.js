@@ -36,7 +36,10 @@ const bookingSchema = new mongoose.Schema({
   totalAmount: { 
     type: Number, 
     required: [true,"total amount is required"] 
-}
+  },
+  stripeSessionId: {
+    type: String,
+  }
 }, { timestamps: true });
 
 const BookingModel = mongoose.model("booking", bookingSchema);
